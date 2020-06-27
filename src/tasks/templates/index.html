@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if error %}
+<div class="alert alert-danger" role="alert">
+    {{error}}
+</div>
+{% endif %}
+<div class="row justify-content-center align-items-center">
+    <div class="col-6">
+        <h3> Add Task </h3>
+        <form id="taskForm" method="POST">
+            {% csrf_token %}
+            <fieldset>
+                <div class="row">
+                    <div class="form-group col-6">
+                        <label for="description">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" minlength="8"
+                            required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="start_date">Start Date</label>
+                        <input type="text" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="due_date">Due Date</label>
+                        <input type="text" class="form-control" id="due_date" name="due_date" required>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="duration">Duration (Days)</label>
+                        <input type="number" class="form-control" id="duration" name="duration" readonly>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#start_date").datepicker({
+            onSelect: date_changed
+        });
+
+        $("#due_date").datepicker({
+            onSelect: date_changed
+        });
+
+        function date_changed(e) {
+            var start = $('#start_date').val();
+            var end = $('#due_date').val();
+
+            var diff = new Date(new Date(end) - new Date(start));
+            var days = diff / 1000 / 60 / 60 / 24;
+
+            if (days)
+                $('#duration').val(days);
+            else
+                $('#duration').val('');
+        }
+
+        $.validator.addMethod('minStrict', function (value, el, param) {
+            return value > param;
+        });
+
+        $('#taskForm').validate({
+            rules: {
+                duration: {
+                    required: true,
+                    minStrict: 1,
+                    number: true,
+                },
+            }
+            ,
+            messages: {
+                duration: {
+                    minStrict: "Start date should be less than Due Date"
+                }
+            }
+        });
+
+    });
+</script>
+
+{% endblock %}
