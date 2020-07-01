@@ -39,8 +39,17 @@
     </div>
 </div>
 
+<br>
+<hr>
+<br>
+
+<div class="row justify-content-center align-items-center">
+    <table id="taskList"></table>
+</div>
+
 <script type="text/javascript">
     $(function () {
+        // jQuery UI Date Components
         $("#start_date").datepicker({
             onSelect: date_changed
         });
@@ -49,6 +58,7 @@
             onSelect: date_changed
         });
 
+        // Populate the duration field on date changed
         function date_changed(e) {
             var start = $('#start_date').val();
             var end = $('#due_date').val();
@@ -62,10 +72,12 @@
                 $('#duration').val('');
         }
 
+        // Validation => From date less that to date
         $.validator.addMethod('minStrict', function (value, el, param) {
             return value > param;
         });
 
+        // Validate the form
         $('#taskForm').validate({
             rules: {
                 duration: {
@@ -82,6 +94,34 @@
             }
         });
 
+        // Fill tasks list
+        const result = JSON.parse('{{ tasks | safe }}');
+        console.log(result);
+
+        const tasks = result.map(e=> {
+            return { 'id': e.pk,
+                      'description': e.fields['description'],
+                      'start_date': e.fields['start_date'],
+                      'due_date': e.fields['due_date']
+                    };
+        });
+        console.log(JSON.stringify(tasks));
+
+        jQuery("#taskList").jqGrid({
+            datatype: "local",
+            autoheight: true,
+            colNames: [ 'Description', 'Start Date', 'Due Date'],
+            colModel: [
+                // { name: 'id', index: 'id', sorttype:"int"},
+                { name: 'description', index: 'description' },
+                { name: 'start_date', index: 'start_date', sorttype:"date" },
+                { name: 'due_date', index: 'due_date', sorttype:"date" },
+            ],
+            caption: "Tasks"
+        });
+
+        for (var i = 0; i <= tasks.length; i++)
+            jQuery("#taskList").jqGrid('addRowData', i + 1, tasks[i]);
     });
 </script>
 

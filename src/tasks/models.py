@@ -10,3 +10,6 @@ class Task(models.Model):
     start_date = models.DateField()
     due_date = models.DateField()
     end_date = models.DateTimeField()
+    
+    def __str__(self):
+        return self.description
